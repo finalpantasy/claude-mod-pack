@@ -34,7 +34,13 @@ One tidy band above the prompt, each row labelled:
 - **Tasks**: your open to-do list, from TodoWrite or claude-mem's work state.
 - **Compact now** and **Handoff** buttons, always there. Handoff has Claude write a handoff packet and move the work to a fresh chat.
 
+![Claude Status Band with sample data: week, 5-hour and context rings, spend and token tiles for this chat, today, 7 days and all time, Compact now and Handoff buttons, the last turn and an open task list](docs/band-sample.png)
+
 `/mods` opens a panel listing every installed mod with its full description and an on/off switch, plus a switch for each band row. `/band` hides or shows the band.
+
+![The /mods panel: Compact now and Handoff, a switch for each band row, and every installed mod with an on/off switch and its full description](docs/mods-panel.png)
+
+*These two pictures are drawn from status-band's own output with sample data: its screenshot test records exactly what the mod draws, and [tools/shots.py](tools/shots.py) lays that out in the desktop app's dark style and photographs it. The mods named focus-timer and pixel-pet are made-up examples.*
 
 ### Claude Mod Hider (`claude-mod-hider`)
 
