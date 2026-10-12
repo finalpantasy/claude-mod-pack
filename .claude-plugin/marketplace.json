@@ -1,0 +1,22 @@
+{
+  "name": "claude-mod-pack",
+  "owner": { "name": "finalpantasy" },
+  "description": "Claude Mod Pack: small Claude Code mods. A status band with usage limits and a mod switcher, a button that hides every mod, and OpenAI Codex as native subagents.",
+  "plugins": [
+    {
+      "name": "status-band",
+      "source": "./status-band",
+      "description": "Claude Status Band: usage limits with a pace that learns your hours, spend, context, last turn and tasks above the prompt, Compact and Handoff buttons, and a /mods panel to switch mods on or off."
+    },
+    {
+      "name": "claude-mod-hider",
+      "source": "./claude-mod-hider",
+      "description": "Claude Mod Hider: one tiny button that hides or shows every Claude Code mod above the prompt."
+    },
+    {
+      "name": "codex-bridge",
+      "source": "./codex-bridge",
+      "description": "Claude Codex Bridge: OpenAI Codex models as native Claude Code subagents, with the same task rows, timers, token counts and follow-ups."
+    }
+  ]
+}

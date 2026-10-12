@@ -1,0 +1,23 @@
+{
+  "name": "codex-bridge",
+  "version": "0.1.1",
+  "author": {
+    "name": "finalpantasy"
+  },
+  "description": "Runs OpenAI Codex models (SOL, Astra, Luna) as native Claude Code subagents: same task rows, timers, token counts, tool rows, background notices and SendMessage follow-ups.",
+  "userConfig": {
+    "models": {
+      "type": "string",
+      "title": "Codex models",
+      "description": "Comma-separated name=model pairs. Each becomes two agent types, codex-bridge:<name> (can edit files) and codex-bridge:<name>-ro (read-only).",
+      "default": "sol=gpt-6.1-sol,astra=gpt-6-astra,luna=gpt-6-luna"
+    },
+    "codexCommand": {
+      "type": "string",
+      "title": "Codex command",
+      "description": "Command that starts Codex, space separated. Empty means auto: codex on PATH, then the npm install's codex.js through node.",
+      "default": ""
+    }
+  },
+  "license": "MIT"
+}
