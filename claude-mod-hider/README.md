@@ -40,6 +40,8 @@ and in your mod's type contract, inside `interface PluginState`:
 
 A survey always gets the band, hidden or not.
 
+With [Claude Status Band](../README.md#claude-status-band-status-band) installed, the band draws the arrow in its own top-right corner, so it sits in the same place whichever order Claude Code draws the mods in.
+
 ## License
 
 MIT

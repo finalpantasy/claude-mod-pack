@@ -1,6 +1,6 @@
 {
   "name": "claude-mod-hider",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Claude Mod Hider: one tiny button that hides or shows every Claude Code mod above the prompt, remembered across sessions.",
   "author": { "name": "finalpantasy" },
   "types": "./types/index.d.ts",

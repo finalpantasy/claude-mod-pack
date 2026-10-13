@@ -26,6 +26,8 @@ const others = atom({ plugin: 'status-band', key: 'others' } as const, {} as Rec
 const compactState = atom({ plugin: 'status-band', key: 'compact' } as const, 'idle' as 'idle' | 'queued' | 'running')
 // Claude Mod Hider's switch: while it is on, the band passes so nothing of ours shows.
 const modsHidden = atom({ plugin: 'claude-mod-hider', key: 'hidden' } as const, false)
+// Mods draw in an order nobody sets, so Claude Mod Hider's arrow could land under the band: the band draws it instead.
+const hiderArrow = atom({ plugin: 'status-band', key: 'hiderArrow' } as const, false)
 const history = atom({ plugin: 'status-band', key: 'history' } as const, null as { until: number; hours: Hours } | null)
 const handoffState = atom({ plugin: 'status-band', key: 'handoff' } as const, 'idle' as 'idle' | 'queued' | 'running')
 const MODS_PANE = 'status-band-mods'
@@ -269,6 +271,8 @@ export const register: Register = on => {
     if ((await read($, handoffState)) !== 'idle') await update($, handoffState, () => 'idle')
     await $.command.register({ name: 'band', description: 'Status band above the prompt: /band hides or shows it' })
     await $.command.register({ name: 'mods', description: 'Switch mods and the status band rows on or off' })
+    const enabled = ((await $.settings.read().catch(() => ({}))) as { enabledPlugins?: Record<string, unknown> }).enabledPlugins ?? {}
+    await update($, hiderArrow, () => Object.entries(enabled).some(([id, isEnabled]) => id.startsWith('claude-mod-hider@') && isEnabled === true))
     // The row switches kept from earlier sessions; none kept, every row shows.
     const saved = await $.store.get('rowsOff').catch(() => undefined)
     if (Array.isArray(saved)) await update($, rowsOff, () => saved.filter((k): k is string => typeof k === 'string'))
@@ -608,10 +612,21 @@ export const register: Register = on => {
     if (actions && !isActionsPlaced) rows.push(row('chat', 'chat', bar('ba', null, ''), <Box key="acts" flexDirection="row" gap={1}>{actions}</Box>))
 
     const below = await next(e).catch(() => null)
-    if (rows.length === 0) return <Box flexDirection="column">{below}</Box>
+    const arrow = (await read($, hiderArrow))
+      ? Button
+        ? <Button key="hide-mods" label="▾" plain onPress={() => void $.command.run({ command: 'hide-mods' }).catch(() => undefined)} />
+        : <Text key="hide-mods" dimColor>▾</Text>
+      : null
+    if (rows.length === 0 && !arrow) return <Box flexDirection="column">{below}</Box>
+    const band = <Box flexDirection="column" paddingX={1}>{rows}</Box>
     return (
       <Box flexDirection="column">
-        <Box flexDirection="column" paddingX={1}>{rows}</Box>
+        {arrow ? (
+          <Box flexDirection="row">
+            <Box flexDirection="column" flexGrow={1} flexShrink={1}>{band}</Box>
+            <Box flexShrink={0} marginLeft={1} alignSelf="flex-start">{arrow}</Box>
+          </Box>
+        ) : band}
         {below}
       </Box>
     )

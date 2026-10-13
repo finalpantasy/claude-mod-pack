@@ -1,6 +1,6 @@
 {
   "name": "status-band",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "One tidy band above the prompt: usage limits and spend, context weather, what the last turn did, and your open tasks, each on its own labelled row, with Compact now and Handoff buttons always there.",
   "author": {
     "name": "finalpantasy"

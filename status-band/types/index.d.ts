@@ -61,6 +61,8 @@ declare module 'claude-code' {
       lastTurn: Turn | null
       tasks: TaskList | null
       isHidden: boolean
+      /** True when Claude Mod Hider is on: the band draws its arrow in its own corner, and Mod Hider draws none beside it. */
+      hiderArrow: boolean
       /** Band rows switched off in /mods ('week', 'usage', 'context', 'spend', 'tokens', 'turn', 'tasks', 'agents'); kept across sessions. */
       rowsOff: string[]
       /** The /mods panel's list, read when it opens. */

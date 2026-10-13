@@ -6,6 +6,12 @@ import type { EngineInterface, Register } from 'claude-code'
 // mods above it in the chain read the same switch and pass. The choice is kept across sessions.
 
 const hidden = atom({ plugin: 'claude-mod-hider', key: 'hidden' } as const, false)
+// Mods draw in an order nobody sets: while Claude Status Band's band shows, it draws this arrow in its own corner.
+const bandArrow = atom({ plugin: 'status-band', key: 'hiderArrow' } as const, false)
+const bandHidden = atom({ plugin: 'status-band', key: 'isHidden' } as const, false)
+
+/** Whether Mod Hider draws its own arrow beside the mods: always while hidden, and while shown unless the band draws it. */
+export const drawsOwnArrow = (isHidden: boolean, bandDrawsArrow: boolean, isBandHidden: boolean) => isHidden || !bandDrawsArrow || isBandHidden
 
 async function toggle($: EngineInterface) {
   const next = !(await read($, hidden))
@@ -39,6 +45,7 @@ export const register: Register = on => {
       ? <Button key="hide-mods" label={isHidden ? '▸ mods' : '▾'} plain onPress={() => void toggle($)} />
       : <Text key="hide-mods" dimColor>{isHidden ? '▸ mods (/hide-mods)' : '▾'}</Text>
     if (isHidden) return <Box flexDirection="row">{control}</Box>
+    if (!drawsOwnArrow(isHidden, await read($, bandArrow), await read($, bandHidden))) return next(e)
     // Shown, the arrow takes a narrow column beside the other mods, in the top-right corner, not a row of its own:
     // the band is no taller than the mods make it.
     const below = await next(e).catch(() => null)

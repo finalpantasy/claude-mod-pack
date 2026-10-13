@@ -401,6 +401,20 @@ test('in a session with no terminal of its own (the desktop app), Compact now ru
   expect(toasts.join(' ')).toContain('/compact is running')
 })
 
+test('with Claude Mod Hider on, the band draws its arrow in its own corner and the arrow runs /hide-mods', async ($, on) => {
+  const { clock } = host(on)
+  const ran: string[] = []
+  on('settings.read', () => ({ value: { enabledPlugins: { 'claude-mod-hider@claude-mod-pack': true } } }) as never)
+  on('command.run', ($, e) => (ran.push(e.command), { text: 'ok' }) as never)
+  await $.session.start(START)
+  await clock.settle()
+  const ui = await $.ui.mount({ plugin: 'status-band', surface: 'desktop', ...BAND })
+  expect(JSON.stringify(await ui.findAll({ type: 'Button' } as never))).toContain('hide-mods')
+  await ui.press({ key: 'hide-mods' })
+  await ui.unmount()
+  expect(ran).toEqual(['hide-mods'])
+})
+
 test('the week pace learns quiet hours: a night asleep is not counted as burn', () => {
   // Three weeks of activity from 9am to 11pm local, nothing overnight.
   let l = emptyLedger()

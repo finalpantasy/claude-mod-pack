@@ -1,5 +1,7 @@
 import { expect, mock, test } from 'claude-code/testing'
 
+import { drawsOwnArrow } from './register'
+
 const BAND = { component: 'AbovePrompt', props: { hasSurvey: false, isWorking: false, maxRows: 12, bodyColumns: 120, scroll: { offset: 0, bodyRows: 11 }, view: {} } } as const
 const RUN = { origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 120 } } as const
 
@@ -27,4 +29,12 @@ test('hiding drops everything beneath and keeps the button; showing brings it ba
     await $.command.run({ ...RUN, command: 'hide-mods', args: '' })
     expect(await texts()).toContain('other mod')
   }
+})
+
+test('Mod Hider leaves the arrow to Claude Status Band only while the band shows it', () => {
+  // hidden, band draws an arrow, band hidden with /band
+  expect(drawsOwnArrow(false, true, false)).toBe(false)
+  expect(drawsOwnArrow(false, false, false)).toBe(true)
+  expect(drawsOwnArrow(false, true, true)).toBe(true)
+  expect(drawsOwnArrow(true, true, false)).toBe(true)
 })
