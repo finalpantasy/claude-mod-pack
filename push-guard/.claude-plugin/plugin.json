@@ -1,0 +1,34 @@
+{
+  "name": "push-guard",
+  "version": "0.1.0",
+  "description": "Claude Push Guard: stops a git push Claude runs when the commits would publish your name, email, home folder path or other words you list, and says exactly where they are.",
+  "author": { "name": "finalpantasy" },
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "words": {
+      "type": "string",
+      "title": "Words to keep private",
+      "description": "Comma-separated: your real name, personal email, company, anything that must not reach a public repo. Matched anywhere, any case.",
+      "default": ""
+    },
+    "protectGitIdentity": {
+      "type": "boolean",
+      "title": "Protect your everyday git identity",
+      "description": "When the commits being pushed use a different name and email than your global git config, also block your global name and email (catches a real name leaking into a pseudonymous repo).",
+      "default": true
+    },
+    "onlyPublic": {
+      "type": "boolean",
+      "title": "Skip private GitHub repos",
+      "description": "Skip the check when the GitHub CLI can see the repo is private. Other hosts, and repos it cannot see, are always checked.",
+      "default": true
+    },
+    "emDashes": {
+      "type": "boolean",
+      "title": "Block em dashes",
+      "description": "Also block new lines and commit messages that contain an em dash.",
+      "default": false
+    }
+  }
+}

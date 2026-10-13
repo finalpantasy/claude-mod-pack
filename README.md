@@ -2,7 +2,7 @@
 
 [![Support me on Ko-fi](https://img.shields.io/badge/Ko--fi-buy%20me%20a%20coffee-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/finalpantasy)
 
-**Small Claude Code mods that make the prompt area more useful: a status band for your usage limits, a switchboard for your mods, a button that hides them all, and OpenAI Codex as native subagents.**
+**Small Claude Code mods: a status band for your usage limits, a switchboard for your mods, a button that hides them all, a guard that keeps your name out of public pushes, and OpenAI Codex as native subagents.**
 
 Each mod installs on its own. Pick the ones you want.
 
@@ -16,6 +16,7 @@ Each mod installs on its own. Pick the ones you want.
 /plugin marketplace add finalpantasy/claude-mod-pack
 /plugin install status-band@claude-mod-pack
 /plugin install claude-mod-hider@claude-mod-pack
+/plugin install push-guard@claude-mod-pack
 /plugin install codex-bridge@claude-mod-pack
 ```
 
@@ -45,6 +46,28 @@ One tidy band above the prompt, each row labelled:
 ### Claude Mod Hider (`claude-mod-hider`)
 
 One small arrow in the corner of the band. Click it and every mod above the prompt folds down to a single **▸ mods** button; click again and they are back. It remembers your choice across sessions. [More, including how other mods can opt in](claude-mod-hider/README.md).
+
+### Claude Push Guard (`push-guard`)
+
+Stops a `git push` Claude runs when the commits about to leave would publish something about you, and tells Claude exactly where it is so it can fix the files and the history first. It checks only what is new in the push: added lines, file names, commit messages and author names.
+
+What it looks for is yours, never anyone else's:
+
+- **Your words**: your real name, personal email, company, anything you list in the plugin's settings (`/plugin configure push-guard@claude-mod-pack`). Empty until you fill it in.
+- **Your home folder path**, read from your own machine, in any spelling (`C:\Users\you`, `/c/Users/you`, escaped JSON, `/home/you`).
+- **Your everyday git name and email**, but only when the commits are made under a different identity, the way a real name slips into a repo you publish under a handle.
+- **Em dashes**, if you turn that on.
+
+What Claude reads when a push is stopped (from the mod's tests, with a made-up name):
+
+```
+Push Guard stopped this push: one place in the commits would publish something private.
+- README.md:13: "Alex Rivera"
+Remove it from the files and from the commit history (amend or rebase the commits, and fix author names with the repo's own git identity), then push again.
+If it is meant to be public, the person can run /push-guard off to push without the check for this session.
+```
+
+Private GitHub repos are skipped when the GitHub CLI can see they are private; any other host is checked. `/push-guard` says what it checks, and `/push-guard off` lets a push through for the rest of the session.
 
 ### Claude Codex Bridge (`codex-bridge`)
 

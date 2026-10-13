@@ -1,7 +1,9 @@
 {
   "name": "claude-mod-pack",
-  "owner": { "name": "finalpantasy" },
-  "description": "Claude Mod Pack: small Claude Code mods. A status band with usage limits and a mod switcher, a button that hides every mod, and OpenAI Codex as native subagents.",
+  "owner": {
+    "name": "finalpantasy"
+  },
+  "description": "Claude Mod Pack: small Claude Code mods. A status band with usage limits and a mod switcher, a button that hides every mod, a guard that keeps your name out of public pushes, and OpenAI Codex as native subagents.",
   "plugins": [
     {
       "name": "status-band",
@@ -17,6 +19,11 @@
       "name": "codex-bridge",
       "source": "./codex-bridge",
       "description": "Claude Codex Bridge: OpenAI Codex models as native Claude Code subagents, with the same task rows, timers, token counts and follow-ups."
+    },
+    {
+      "name": "push-guard",
+      "source": "./push-guard",
+      "description": "Claude Push Guard: stops a git push Claude runs when the commits would publish your name, email, home folder path or other words you list, and says exactly where they are."
     }
   ]
 }
