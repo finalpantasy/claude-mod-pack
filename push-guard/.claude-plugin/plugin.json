@@ -1,6 +1,6 @@
 {
   "name": "push-guard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Claude Push Guard: stops a git push Claude runs when the commits would publish your name, email, home folder path or other words you list, and says exactly where they are.",
   "author": { "name": "finalpantasy" },
   "license": "MIT",

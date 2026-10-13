@@ -158,6 +158,12 @@ const GIT_VALUE_OPTIONS = new Set(['-c', '-C', '--git-dir', '--work-tree', '--na
 // git push options that take the next word as their value.
 const PUSH_VALUE_OPTIONS = new Set(['--repo', '--receive-pack', '--exec', '-o', '--push-option', '--recurse-submodules'])
 
+/** A folder as a shell wrote it, as the process runner needs it: Git Bash's /c/... becomes C:/... on Windows-style paths. */
+export function nativeDir(dir: string): string {
+  const m = /^\/([a-zA-Z])(\/.*)?$/.exec(dir)
+  return m ? `${m[1]!.toUpperCase()}:${m[2] ?? '/'}` : dir
+}
+
 /** Every push in a command: git push, or gh repo create with --push; where it runs and to which remote. */
 export function pushTargets(command: string): PushTarget[] {
   const all = words(command)

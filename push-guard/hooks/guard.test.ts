@@ -1,7 +1,7 @@
 import type { On } from 'claude-code'
 import { expect, test } from 'claude-code/testing'
 
-import { needles, pushTargets } from './scan'
+import { nativeDir, needles, pushTargets } from './scan'
 
 const START = { cwd: '/repo', surface: 'terminal', isInteractive: true } as const
 const FS = '\x1f'
@@ -119,6 +119,22 @@ test('finds pushes behind cd, git options with quoted values, and gh repo create
   expect(pushTargets('git -C site push')).toEqual([{ kind: 'git', dir: 'site' }])
   expect(pushTargets('gh repo create me/app --public --source=. --push')).toEqual([{ kind: 'gh', dir: '.' }])
   expect(pushTargets('echo push && git status && git pull')).toEqual([])
+})
+
+test('Git Bash folders become Windows folders for the process runner', async ($, on) => {
+  expect(nativeDir('/c/Users/sam/app')).toBe('C:/Users/sam/app')
+  expect(nativeDir('/d')).toBe('D:/')
+  expect(nativeDir('/home/kim/app')).toBe('/home/kim/app')
+  const cwds: (string | undefined)[] = []
+  on('process.run', ($, e) => (cwds.push((e as { init?: { cwd?: string }; cwd?: string }).init?.cwd ?? (e as { cwd?: string }).cwd), { value: { exitCode: 0, stdout: '', stderr: '' } }) as never)
+  on('env.get', ($, e) => ({ value: (e as { name: string }).name === 'USERPROFILE' ? 'C:\Users\sam' : undefined }) as never)
+  on('session.start', ($, e) => ({ cwd: e.cwd }))
+  on('command.register', ($, e) => ({ value: { command: e.name } }))
+  on('tool.call', () => ({ result: 'ok', text: 'ok' }) as never)
+  await $.session.start(START)
+  await $.tool.call({ tool: 'Bash', command: 'cd /c/Users/sam/app && git push' } as never)
+  expect(cwds.length).toBeGreaterThan(0)
+  expect(cwds.filter(Boolean).every(c => c === 'C:/Users/sam/app')).toBe(true)
 })
 
 test('the home folder needle is built from whoever runs it', () => {

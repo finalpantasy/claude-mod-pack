@@ -1,7 +1,7 @@
 import type { EngineInterface, Register } from 'claude-code'
 import { atom, read, update } from 'claude-code'
 
-import { COMMIT_FORMAT, PATCH_FORMAT, denyText, findHits, githubRepo, needles, parseAdded, parseCommits, pushTargets } from './scan'
+import { COMMIT_FORMAT, PATCH_FORMAT, denyText, findHits, githubRepo, nativeDir, needles, parseAdded, parseCommits, pushTargets } from './scan'
 import type { PushTarget } from './scan'
 
 // Claude Push Guard: before a git push Claude runs, read the commits about to leave and stop the push
@@ -23,7 +23,11 @@ async function run($: EngineInterface, argv: string[], cwd?: string) {
 
 /** Why this push must not go ahead, or null when it may. */
 async function check($: EngineInterface, target: PushTarget, o: Options): Promise<string | null> {
-  const cwd = target.dir
+  // A home-relative folder starts from the home folder; Git Bash's /c/... is C:/... to the process runner.
+  const home = (await $.env.get('USERPROFILE')) ?? (await $.env.get('HOME'))
+  const raw = target.dir?.startsWith('~') && home ? home + target.dir.slice(1) : target.dir
+  const isWindows = (await $.env.get('USERPROFILE')) !== undefined
+  const cwd = raw === undefined ? undefined : isWindows ? nativeDir(raw) : raw
   const git = (...args: string[]) => run($, ['git', ...args], cwd)
 
   const upstream = await git('rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}')
@@ -46,7 +50,6 @@ async function check($: EngineInterface, target: PushTarget, o: Options): Promis
   const patch = await git('log', '-p', '--no-color', '--unified=0', PATCH_FORMAT, ...range)
   if (!patch.ok) return `Push Guard could not read the changes this push would send (${patch.err}), so it stopped the push. The person can run /push-guard off to push without the check.`
 
-  const home = (await $.env.get('USERPROFILE')) ?? (await $.env.get('HOME'))
   let identity: { name?: string; email?: string } | undefined
   if (o.protectGitIdentity) {
     const name = (await git('config', '--global', 'user.name')).out.trim()

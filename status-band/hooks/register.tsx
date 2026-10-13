@@ -74,18 +74,42 @@ async function compactNow($: EngineInterface): Promise<void> {
   await runCompact($, 1)
 }
 
+// The desktop app and other SDK hosts have no between-turns compaction for a plugin yet: there the
+// /compact command does it, run as the person would type it. Once seen, the button goes straight to it.
+let compactByPrompt = false
+const NO_PLUGIN_COMPACT = /headless|not available/i
+
+async function compactWithPrompt($: EngineInterface): Promise<void> {
+  try {
+    await $.command.run({ command: 'compact' })
+    $.ui.toast('Compacting: /compact is running in this chat.')
+  } catch (err) {
+    $.ui.toast(`Could not compact (${err instanceof Error ? err.message : String(err)}). Type /compact to compact this chat.`)
+  }
+}
+
 async function runCompact($: EngineInterface, tries: number): Promise<void> {
   await update($, compactState, () => 'running')
+  if (compactByPrompt) {
+    await compactWithPrompt($)
+    await update($, compactState, () => 'idle')
+    return
+  }
   try {
     const r = await $.session.compact()
     $.ui.toast('skip' in r && typeof r.skip === 'string' ? `Not compacted: ${r.skip}` : 'Compacted. The next turns are cheaper.')
   } catch (err) {
-    // Just after a turn the engine can still count it as running for a moment: try again shortly.
-    if (tries > 1) {
+    const message = err instanceof Error ? err.message : String(err)
+    if (NO_PLUGIN_COMPACT.test(message)) {
+      compactByPrompt = true
+      await compactWithPrompt($)
+    } else if (tries > 1) {
+      // Just after a turn the engine can still count it as running for a moment: try again shortly.
       await $.clock.sleep(1500)
       return runCompact($, tries - 1)
+    } else {
+      $.ui.toast(`Could not compact: ${message}`)
     }
-    $.ui.toast(`Could not compact: ${err instanceof Error ? err.message : String(err)}`)
   }
   await update($, compactState, () => 'idle')
 }
@@ -238,6 +262,8 @@ export async function switchMod($: EngineInterface, id: string, on: boolean): Pr
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const started = await next(e)
+    // A session with no interactive terminal (the desktop app, the SDK, -p) compacts through a /compact prompt.
+    compactByPrompt = (e as { isInteractive?: boolean }).isInteractive === false
     // A compact cut off by a reload must not leave the button stuck.
     if ((await read($, compactState)) !== 'idle') await update($, compactState, () => 'idle')
     if ((await read($, handoffState)) !== 'idle') await update($, handoffState, () => 'idle')

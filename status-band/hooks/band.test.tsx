@@ -385,6 +385,22 @@ test('a compact a hook vetoes says why instead of doing nothing', async ($, on) 
   expect(toasts.join(' ')).toContain('Not compacted: a PreCompact hook said no')
 })
 
+test('in a session with no terminal of its own (the desktop app), Compact now runs /compact instead', async ($, on) => {
+  const { clock } = host(on)
+  const ran: string[] = []
+  on('command.run', ($, e) => (ran.push(`/${e.command} ${e.args}`.trim()), { text: 'Compacted' }) as never)
+  await $.session.start({ ...START, surface: 'desktop', isInteractive: false })
+  await clock.settle()
+  const ui = await $.ui.mount({ plugin: 'status-band', surface: 'desktop', ...BAND })
+  await ui.press({ key: 'compact' })
+  await clock.settle()
+  expect(JSON.stringify(await ui.findAll({ type: 'Button' } as never))).toContain('Compact now')
+  await ui.unmount()
+  expect(compacted).toBe(0)
+  expect(ran).toEqual(['/compact'])
+  expect(toasts.join(' ')).toContain('/compact is running')
+})
+
 test('the week pace learns quiet hours: a night asleep is not counted as burn', () => {
   // Three weeks of activity from 9am to 11pm local, nothing overnight.
   let l = emptyLedger()
